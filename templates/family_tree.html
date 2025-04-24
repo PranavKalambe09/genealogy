@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Family Tree{% endblock %}
+
+{% block extra_head %}
+<style>
+    .tree-container {
+        height: calc(100vh - 200px);
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .tree-node {
+        border-left: 2px solid #007bff;
+        padding-left: 10px;
+        margin: 5px 0;
+    }
+    .relationship-line {
+        border-bottom: 1px dashed #6c757d;
+        margin: 2px 0 2px 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Family Tree</h1>
+
+<div class="row">
+    <!-- Tree View on the Left -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Family Members & Relationships</h3>
+            </div>
+            <div class="card-body tree-container">
+                {% if individuals %}
+                    <h4>Family Members</h4>
+                    {% for individual in individuals %}
+                        <div class="tree-node">
+                            <strong>{{ individual['FirstName'] }} {{ individual['LastName'] }}</strong>
+                            <p>
+                                {% if individual['Gender'] %}Gender: {{ individual['Gender'] }}<br>{% endif %}
+                                {% if individual['BirthDate'] %}Born: {{ individual['BirthDate'] }}<br>{% endif %}
+                                {% if individual['DeathDate'] %}Died: {{ individual['DeathDate'] }}<br>{% endif %}
+                                {% if individual['Occupation'] %}Occupation: {{ individual['Occupation'] }}{% endif %}
+                            </p>
+                        </div>
+                    {% endfor %}
+                    
+                    <h4 class="mt-4">Relationships</h4>
+                    {% for relationship in relationships %}
+                        <div class="relationship-line">
+                            <p>
+                                <strong>{{ relationship['Name1'] }} {{ relationship['LastName1'] }}</strong>
+                                is 
+                                <strong>{{ relationship['RelationshipType'] }}</strong> 
+                                of 
+                                <strong>{{ relationship['Name2'] }} {{ relationship['LastName2'] }}</strong>
+                                <br>
+                                {% if relationship['StartDate'] %}From: {{ relationship['StartDate'] }}{% endif %}
+                                {% if relationship['EndDate'] %} To: {{ relationship['EndDate'] }}{% endif %}
+                            </p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No family members found. Add some using the forms on the right.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Forms on the Right -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Add Family Member</h3>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('add_individual') }}" method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="birth_date" class="form-label">Birth Date</label>
+                            <input type="date" class="form-control" id="birth_date" name="birth_date">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="death_date" class="form-label">Death Date (if applicable)</label>
+                            <input type="date" class="form-control" id="death_date" name="death_date">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="occupation" class="form-label">Occupation</label>
+                        <input type="text" class="form-control" id="occupation" name="occupation">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Add Family Member</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>Add Relationship</h3>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('add_relationship') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="individual1" class="form-label">Person 1</label>
+                        <select class="form-select" id="individual1" name="individual1" required>
+                            <option value="">Select Person</option>
+                            {% for individual in individuals %}
+                                <option value="{{ individual['IndividualID'] }}">
+                                    {{ individual['FirstName'] }} {{ individual['LastName'] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="relationship_type" class="form-label">Relationship Type</label>
+                        <select class="form-select" id="relationship_type" name="relationship_type" required>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Child">Child</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Grandparent">Grandparent</option>
+                            <option value="Grandchild">Grandchild</option>
+                            <option value="Cousin">Cousin</option>
+                            <option value="Uncle/Aunt">Uncle/Aunt</option>
+                            <option value="Niece/Nephew">Niece/Nephew</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="individual2" class="form-label">Person 2</label>
+                        <select class="form-select" id="individual2" name="individual2" required>
+                            <option value="">Select Person</option>
+                            {% for individual in individuals %}
+                                <option value="{{ individual['IndividualID'] }}">
+                                    {{ individual['FirstName'] }} {{ individual['LastName'] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="start_date" class="form-label">Start Date (if applicable)</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="end_date" class="form-label">End Date (if applicable)</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date">
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Add Relationship</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

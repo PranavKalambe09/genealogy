@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Welcome to the Genealogy Project</h1>
+    <p class="lead">Track your family history and build your family tree with our easy-to-use tools.</p>
+    <hr class="my-4">
+    {% if current_user.is_authenticated %}
+        <p>You're logged in. View your family tree or add new family members.</p>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('family_tree') }}">View Family Tree</a>
+    {% else %}
+        <p>Get started by logging in or creating a new account.</p>
+        <div>
+            <a class="btn btn-primary btn-lg me-2" href="{{ url_for('auth.login') }}">Login</a>
+            <a class="btn btn-outline-primary btn-lg" href="{{ url_for('auth.register') }}">Register</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
