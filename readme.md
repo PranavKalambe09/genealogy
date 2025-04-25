@@ -1,7 +1,3 @@
-
-
-Here is the README file in Markdown format:
-
 # Family Tree Project
 =======================
 
@@ -38,7 +34,7 @@ git clone https://github.com/your-username/family-tree.git
 ### Step 2: Install Dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install flask flask-login flask-wtf email_validator
 ```
 
 ### Step 3: Run the Application
@@ -54,9 +50,9 @@ python app.py
 
 Open a web browser and navigate to `http://localhost:5000`
 
-### Step 2: Create a Family Tree
+### Step 2: Login or Register
 
-Click on the "Create Family Tree" button to start creating your family tree
+Click on the "Login" or "Register" button to login into your private dashboard
 
 ### Step 3: Add Individuals and Relationships
 
@@ -88,7 +84,7 @@ This project was built using the following resources:
 ## Authors
 ---------
 
-* [Your Name]
+* [Pranav Kalambe]
 
 ## Version History
 -----------------
