@@ -20,52 +20,96 @@
         border-bottom: 1px dashed #6c757d;
         margin: 2px 0 2px 20px;
     }
+    #family-tree-visualization {
+        width: 100%;
+        height: 600px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    .nodes circle {
+        stroke: #fff;
+        stroke-width: 2px;
+    }
+    .links line {
+        stroke-opacity: 0.6;
+    }
+    .tabs-container {
+        margin-bottom: 20px;
+    }
+    .tab-content {
+        padding: 20px;
+        border: 1px solid #dee2e6;
+        border-top: none;
+        border-radius: 0 0 5px 5px;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Family Tree</h1>
+<h1 class="mb-4">Your Family Tree</h1>
 
 <div class="row">
-    <!-- Tree View on the Left -->
+    <!-- Left Section -->
     <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h3>Family Members & Relationships</h3>
-            </div>
-            <div class="card-body tree-container">
-                {% if individuals %}
-                    <h4>Family Members</h4>
-                    {% for individual in individuals %}
-                        <div class="tree-node">
-                            <strong>{{ individual['FirstName'] }} {{ individual['LastName'] }}</strong>
-                            <p>
-                                {% if individual['Gender'] %}Gender: {{ individual['Gender'] }}<br>{% endif %}
-                                {% if individual['BirthDate'] %}Born: {{ individual['BirthDate'] }}<br>{% endif %}
-                                {% if individual['DeathDate'] %}Died: {{ individual['DeathDate'] }}<br>{% endif %}
-                                {% if individual['Occupation'] %}Occupation: {{ individual['Occupation'] }}{% endif %}
-                            </p>
-                        </div>
-                    {% endfor %}
-                    
-                    <h4 class="mt-4">Relationships</h4>
-                    {% for relationship in relationships %}
-                        <div class="relationship-line">
-                            <p>
-                                <strong>{{ relationship['Name1'] }} {{ relationship['LastName1'] }}</strong>
-                                is 
-                                <strong>{{ relationship['RelationshipType'] }}</strong> 
-                                of 
-                                <strong>{{ relationship['Name2'] }} {{ relationship['LastName2'] }}</strong>
-                                <br>
-                                {% if relationship['StartDate'] %}From: {{ relationship['StartDate'] }}{% endif %}
-                                {% if relationship['EndDate'] %} To: {{ relationship['EndDate'] }}{% endif %}
-                            </p>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <p>No family members found. Add some using the forms on the right.</p>
-                {% endif %}
+        <!-- Tabs for switching between visualizations -->
+        <div class="tabs-container">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="visual-tab" data-bs-toggle="tab" href="#visual" role="tab">Visual Tree</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="list-tab" data-bs-toggle="tab" href="#list" role="tab">List View</a>
+                </li>
+            </ul>
+            
+            <div class="tab-content">
+                <!-- Visual Tree Tab -->
+                <div class="tab-pane fade show active" id="visual" role="tabpanel">
+                    <div id="family-tree-visualization"></div>
+                </div>
+                
+                <!-- List View Tab -->
+                <div class="tab-pane fade" id="list" role="tabpanel">
+                    <div class="tree-container">
+                        {% if individuals %}
+                            <h4>Family Members</h4>
+                            {% for individual in individuals %}
+                                <div class="tree-node">
+                                    <strong>{{ individual['FirstName'] }} {{ individual['LastName'] }}</strong>
+                                    <p>
+                                        {% if individual['Gender'] %}Gender: {{ individual['Gender'] }}<br>{% endif %}
+                                        {% if individual['BirthDate'] %}Born: {{ individual['BirthDate'] }}<br>{% endif %}
+                                        {% if individual['DeathDate'] %}Died: {{ individual['DeathDate'] }}<br>{% endif %}
+                                        {% if individual['Occupation'] %}Occupation: {{ individual['Occupation'] }}{% endif %}
+                                    </p>
+                                    <form action="{{ url_for('delete_individual') }}" method="POST">
+                                        <input type="hidden" name="individual_id" value="{{ individual['IndividualID'] }}">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                            
+                            <h4 class="mt-4">Relationships</h4>
+                            {% for relationship in relationships %}
+                                <div class="relationship-line">
+                                    <p>
+                                        <strong>{{ relationship['Name1'] }} {{ relationship['LastName1'] }}</strong>
+                                        is 
+                                        <strong>{{ relationship['RelationshipType'] }}</strong> 
+                                        of 
+                                        <strong>{{ relationship['Name2'] }} {{ relationship['LastName2'] }}</strong>
+                                        <br>
+                                        {% if relationship['StartDate'] %}From: {{ relationship['StartDate'] }}{% endif %}
+                                        {% if relationship['EndDate'] %} To: {{ relationship['EndDate'] }}{% endif %}
+                                    </p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No family members found. Add some using the forms on the right.</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -78,6 +122,9 @@
             </div>
             <div class="card-body">
                 <form action="{{ url_for('add_individual') }}" method="POST">
+                    <!-- Hidden field for user ID - the backend will associate with user's tree -->
+                    <input type="hidden" name="user_id" value="{{ current_user.id }}">
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="first_name" class="form-label">First Name</label>
@@ -123,6 +170,9 @@
             </div>
             <div class="card-body">
                 <form action="{{ url_for('add_relationship') }}" method="POST">
+                    <!-- Hidden field for user ID - the backend will associate with user's tree -->
+                    <input type="hidden" name="user_id" value="{{ current_user.id }}">
+                    
                     <div class="mb-3">
                         <label for="individual1" class="form-label">Person 1</label>
                         <select class="form-select" id="individual1" name="individual1" required>
@@ -139,13 +189,6 @@
                         <select class="form-select" id="relationship_type" name="relationship_type" required>
                             <option value="Spouse">Spouse</option>
                             <option value="Parent">Parent</option>
-                            <option value="Child">Child</option>
-                            <option value="Sibling">Sibling</option>
-                            <option value="Grandparent">Grandparent</option>
-                            <option value="Grandchild">Grandchild</option>
-                            <option value="Cousin">Cousin</option>
-                            <option value="Uncle/Aunt">Uncle/Aunt</option>
-                            <option value="Niece/Nephew">Niece/Nephew</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -177,4 +220,11 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<!-- D3.js library -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<!-- Custom family tree visualization -->
+<script src="{{ url_for('static', filename='js/family-tree.js') }}"></script>
 {% endblock %}
