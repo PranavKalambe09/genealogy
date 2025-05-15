@@ -66,6 +66,13 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- PNG export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/save-svg-as-png/1.4.17/saveSvgAsPng.min.js"></script>
+
+    <!-- PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/svg2pdf.js@1.3.7/dist/svg2pdf.min.js"></script>
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

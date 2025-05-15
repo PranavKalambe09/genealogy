@@ -309,3 +309,34 @@ function createLegend(svg, colors, width) {
         yOffset += 20;
     });
 }
+
+function downloadTreeAsPNG() {
+    const svg = document.querySelector("#family-tree-visualization svg");
+    if (!svg) {
+        alert("SVG not found!");
+        return;
+    }
+    saveSvgAsPng(svg, "family-tree.png", {
+        backgroundColor: "white",
+        scale: 2 // for higher resolution
+    });
+}
+
+async function downloadTreeAsPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('landscape', 'pt', 'a4');
+
+    const svgElement = document.querySelector("#family-tree-visualization svg");
+    if (!svgElement) {
+        alert("SVG not found!");
+        return;
+    }
+
+    await svg2pdf(svgElement, doc, {
+        xOffset: 20,
+        yOffset: 20,
+        scale: 0.7 // adjust scale to fit
+    });
+
+    doc.save("family-tree.pdf");
+}
